@@ -12,12 +12,15 @@ class OnClick {
 
   OnClick(this.function, this.action, {this.params = const {}});
 
-  bool equals(OnClick onClick) {
+  bool equals(OnClick onClick, {bool ignoreParams = false}) {
     if (function != onClick.function) {
       return false;
     }
     if (action != onClick.action) {
       return false;
+    }
+    if (ignoreParams) {
+      return true;
     }
     if (params.length != onClick.params.length) {
       return false;

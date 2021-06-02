@@ -7,6 +7,7 @@ import 'package:streamberry_client/src/blocs/button_panel/button_functions/butto
 import 'package:streamberry_client/src/blocs/button_panel/button_functions/folder/actions/open_folder_action.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_functions/on_click.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_cubit.dart';
+import 'package:streamberry_client/src/ui/views/button_view/button/cached_image.dart';
 
 class DefinedButton extends StatelessWidget {
   final ButtonData buttonData;
@@ -39,8 +40,8 @@ class DefinedButton extends StatelessWidget {
                 color: buttonData.color,
                 border: Border.all(color: buttonData.color, width: 3.0),
               ),
-              child: IconButton(
-                onPressed: () {
+              child: InkWell(
+                onTap: () {
                   List<OnClick> onClicks = List.of(buttonData.onClicks);
                   ButtonFunctions.getActions(buttonData).forEach((buttonAction) {
                     if (buttonAction is OpenFolderAction) {
@@ -48,12 +49,12 @@ class DefinedButton extends StatelessWidget {
                     } else {
                       buttonAction.runFunction(buttonPanelCubit);
                     }
-                    onClicks.removeWhere((element) => element.equals(buttonAction.toOnClick()));
+                    onClicks.removeWhere((element) => element.equals(buttonAction.toOnClick(), ignoreParams: true));
                   });
                   List<Map<String, dynamic>> jsons = onClicks.map((e) => e.toJson()).toList();
                   App.socketOf(context).write(jsonEncode({'actions' :jsons}));
                 },
-                icon: const Icon(Icons.margin),
+                child: CachedImage(buttonData.image),
               ),
             ),
           ),

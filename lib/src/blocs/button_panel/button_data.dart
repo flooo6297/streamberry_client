@@ -24,6 +24,8 @@ class ButtonData {
   @JsonKey(defaultValue: null)
   ButtonPanelState? childState;
 
+  String image;
+
   get canBeOverwritten => (!enabled && onClicks.isEmpty);
 
   void delete() {
@@ -40,37 +42,10 @@ class ButtonData {
     List<OnClick> onClicks = const [],
     this.enabled = true,
     this.childState,
+    this.image = '',
   })  : assert(height > 0),
         assert(width > 0) {
     this.onClicks.addAll(onClicks);
-  }
-
-  ButtonData.copy(ButtonData buttonData) {
-    positionY = buttonData.positionY;
-    positionX = buttonData.positionX;
-    color = buttonData.color;
-    height = buttonData.height;
-    width = buttonData.width;
-    onClicks.addAll(buttonData.onClicks);
-    enabled = buttonData.enabled;
-  }
-
-  bool overlaps(ButtonData button) {
-    Point l1 = Point(positionX, positionY);
-    Point r1 = Point(positionX + width, positionY + height);
-    Point l2 = Point(button.positionX, button.positionY);
-    Point r2 = Point(
-        button.positionX + button.width, button.positionY + button.height);
-    if (l1.x == r1.x || l1.y == r2.y || l2.x == r2.x || l2.y == r2.y) {
-      return false;
-    }
-    if (l1.x >= r2.x || l2.x >= r1.x) {
-      return false;
-    }
-    if (l1.y >= r2.y || l2.y >= r1.y) {
-      return false;
-    }
-    return true;
   }
 
   bool equals(ButtonData buttonData) {
@@ -91,7 +66,8 @@ class ButtonData {
         height == buttonData.height &&
         width == buttonData.width &&
         actionListsAreSame &&
-        enabled == buttonData.enabled;
+        enabled == buttonData.enabled &&
+        image == buttonData.image;
   }
 
   factory ButtonData.fromJson(Map<String, dynamic> json) =>

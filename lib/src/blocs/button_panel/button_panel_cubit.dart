@@ -13,24 +13,26 @@ class ButtonPanelCubit extends Cubit<ButtonPanelState> {
   ButtonPanelCubit._(ButtonPanelState initialState,)
       : super(initialState);
 
-  static ButtonPanelCubit init(int x, int y,
-      {ButtonData? parentButtonData,
-      ButtonPanelCubit? parentButtonPanelCubit}) {
-    ButtonPanelState initialState = ButtonPanelState(
-        x,
-        y,
-        const Size(100, 100),
-        Colors.black87,
-        const EdgeInsets.all(8.0)); //TODO: Implement loading from disk
-    return ButtonPanelCubit._(initialState,);
-  }
-
   ButtonPanelCubit(ButtonPanelState initialState) : super(initialState);
 
-  ButtonPanelState getState() {
+  String getPathString() {
+    String pathString = "Home";
     ButtonPanelState cur = state;
     for (var value in path) {
       cur = cur.panelList[value].childState!;
+      pathString = '$pathString ❯ ${cur.name}';
+    }
+    return pathString;
+  }
+
+  ButtonPanelState getState() {
+    ButtonPanelState cur = state;
+    for (int i = 0; i < path.length; i++) {
+      if (cur.panelList[path[i]].childState == null) {
+        path.removeRange(i, path.length);
+        return cur;
+      }
+      cur = cur.panelList[path[i]].childState!;
     }
     return cur;
   }

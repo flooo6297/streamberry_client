@@ -42,21 +42,28 @@ class _ButtonViewState extends State<ButtonView> {
                 height: double.infinity,
                 width: double.infinity,
                 alignment: Alignment.center,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height:
-                    panelState.ySize * panelState.gridTilingSize.height,
-                    width: panelState.xSize * panelState.gridTilingSize.width,
-                    child: Stack(
-                      children: [
-                        ...(panelState.panelList
-                            .map((buttonData) =>
-                            Button(buttonData, widget.buttonPanelCubit))
-                            .toList()),
-                      ],
+                child: Stack(
+                  children: [
+                    Positioned(top: 8,
+                      left: 8,
+                      child: Text(widget.buttonPanelCubit.getPathString()),),
+                    Container(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height:
+                        panelState.ySize * panelState.gridTilingSize.height,
+                        width: panelState.xSize * panelState.gridTilingSize.width,
+                        child: Stack(
+                          children: [
+                            ...(panelState.panelList
+                                .map((buttonData) =>
+                                Button(buttonData, widget.buttonPanelCubit))
+                                .toList()),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               );
             },

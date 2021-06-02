@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_cubit.dart';
@@ -19,12 +20,16 @@ class App extends StatefulWidget {
   static Socket socketOf(BuildContext context) =>
       context.findAncestorStateOfType<_AppState>()!.socket;
 
+  static Stream<Uint8List> broadcastOf(BuildContext context) =>
+      context.findAncestorStateOfType<_AppState>()!.broadcast;
+
   @override
   _AppState createState() => _AppState();
 }
 
 class _AppState extends State<App> {
   late Socket socket;
+  late Stream<Uint8List> broadcast;
 
   StreamController<ConnectionState> connection = StreamController();
 
@@ -77,25 +82,32 @@ class _AppState extends State<App> {
   }
 
   void initialize() {
+    buttonPanelCubit = null;
     handleConnection().then((newSocket) {
       socket = newSocket;
 
-      socket.listen((data) {
+      broadcast = socket.asBroadcastStream();
+      broadcast.listen((data) {
         final serverMessage = String.fromCharCodes(data);
-        Map<String, dynamic> serverMessageContent = jsonDecode(serverMessage);
+        print('$serverMessage');
+        List<dynamic> serverMessageContentMapList = jsonDecode('[${serverMessage.replaceAll('}{', '},{')}]');
 
-        if (serverMessageContent.containsKey('panelData')) {
-          if (buttonPanelCubit == null) {
-            buttonPanelCubit = ButtonPanelCubit(ButtonPanelState.fromJson(
-                serverMessageContent['panelData'] as Map<String, dynamic>));
-          } else {
-            buttonPanelCubit!.setState(ButtonPanelState.fromJson(
-                serverMessageContent['panelData'] as Map<String, dynamic>));
+        for (var serverMessageContentMap in serverMessageContentMapList) {
+          if (serverMessageContentMap is Map<String, dynamic>) {
+            if (serverMessageContentMap.containsKey('panelData')) {
+              if (buttonPanelCubit == null) {
+                buttonPanelCubit = ButtonPanelCubit(ButtonPanelState.fromJson(
+                    serverMessageContentMap['panelData'] as Map<String, dynamic>));
+                connection.sink.add(ConnectionState.active);
+              } else {
+                connection.sink.add(ConnectionState.active);
+                buttonPanelCubit!.setState(ButtonPanelState.fromJson(
+                    serverMessageContentMap['panelData'] as Map<String, dynamic>));
+              }
+            }
           }
-          connection.sink.add(ConnectionState.active);
         }
 
-        print('$serverMessage');
       }, onError: (error) {
         print(error);
         socket.destroy();

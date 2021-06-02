@@ -13,6 +13,8 @@ class ButtonPanelState {
 
   late ButtonData nonDefinedButtonDesign;
 
+  String name = 'Folder';
+
   @SizeSerializer()
   late Size gridTilingSize;
 
@@ -26,7 +28,7 @@ class ButtonPanelState {
   late int ySize;
 
   ButtonPanelState(this.xSize, this.ySize, this.gridTilingSize,
-      this.backgroundColor, this.margin) {
+      this.backgroundColor, this.margin, this.name) {
     panelList = [];
 
     nonDefinedButtonDesign = ButtonData(0, 0);
@@ -46,6 +48,7 @@ class ButtonPanelState {
     backgroundColor = stateToCopy.backgroundColor;
     margin = stateToCopy.margin;
     nonDefinedButtonDesign = stateToCopy.nonDefinedButtonDesign;
+    name = stateToCopy.name;
   }
 
   factory ButtonPanelState.fromJson(Map<String, dynamic> json) =>
