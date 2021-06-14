@@ -8,6 +8,8 @@ import 'package:streamberry_client/src/blocs/button_panel/button_panel_cubit.dar
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_state.dart';
 import 'package:streamberry_client/src/ui/views/button_view/button_view.dart';
 
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
 
@@ -17,18 +19,15 @@ class App extends StatefulWidget {
   static ButtonPanelCubit buttonPanelCubitOf(BuildContext context) =>
       context.findAncestorStateOfType<_AppState>()!.buttonPanelCubit!;
 
-  static Socket socketOf(BuildContext context) =>
+  static IO.Socket socketOf(BuildContext context) =>
       context.findAncestorStateOfType<_AppState>()!.socket;
-
-  static Stream<Uint8List> broadcastOf(BuildContext context) =>
-      context.findAncestorStateOfType<_AppState>()!.broadcast;
 
   @override
   _AppState createState() => _AppState();
 }
 
 class _AppState extends State<App> {
-  late Socket socket;
+  late IO.Socket socket;
   late Stream<Uint8List> broadcast;
 
   StreamController<ConnectionState> connection = StreamController();
@@ -70,7 +69,7 @@ class _AppState extends State<App> {
     connection.sink.add(ConnectionState.waiting);
 
     Future<Socket> newSocketFuture =
-        Socket.connect('localhost', 4567, timeout: const Duration(hours: 5));
+        Socket.connect('192.168.2.126', 4567, timeout: const Duration(hours: 5));
 
     return newSocketFuture.onError((error, stackTrace) {
       print('try reconnect');
@@ -80,44 +79,53 @@ class _AppState extends State<App> {
       return value;
     });
   }
-
+  
+  
+  
   void initialize() {
     buttonPanelCubit = null;
-    handleConnection().then((newSocket) {
-      socket = newSocket;
-
-      broadcast = socket.asBroadcastStream();
-      broadcast.listen((data) {
-        final serverMessage = String.fromCharCodes(data);
-        print('$serverMessage');
-        List<dynamic> serverMessageContentMapList = jsonDecode('[${serverMessage.replaceAll('}{', '},{')}]');
-
-        for (var serverMessageContentMap in serverMessageContentMapList) {
-          if (serverMessageContentMap is Map<String, dynamic>) {
-            if (serverMessageContentMap.containsKey('panelData')) {
-              if (buttonPanelCubit == null) {
-                buttonPanelCubit = ButtonPanelCubit(ButtonPanelState.fromJson(
-                    serverMessageContentMap['panelData'] as Map<String, dynamic>));
-                connection.sink.add(ConnectionState.active);
-              } else {
-                connection.sink.add(ConnectionState.active);
-                buttonPanelCubit!.setState(ButtonPanelState.fromJson(
-                    serverMessageContentMap['panelData'] as Map<String, dynamic>));
-              }
-            }
-          }
-        }
-
-      }, onError: (error) {
-        print(error);
-        socket.destroy();
-        connection.sink.add(ConnectionState.none);
-      }, onDone: () {
-        print('Server left.');
-        socket.destroy();
-        connection.sink.add(ConnectionState.none);
-      });
+    connection.sink.add(ConnectionState.waiting);
+    
+    socket = IO.io('http://192.168.2.126:3000', <String, dynamic>{
+    'transports': ['websocket']
     });
+    socket.onConnect((_) {
+      print('connected');
+    });
+    socket.onError((data) {
+      buttonPanelCubit = null;
+      connection.sink.add(ConnectionState.waiting);
+    });
+    socket.onDisconnect((data) {
+      buttonPanelCubit = null;
+      connection.sink.add(ConnectionState.waiting);
+    });
+    socket.on('panelData', (data) {
+
+      Map<String, dynamic> contentMap = jsonDecode(data);
+
+      if (buttonPanelCubit == null) {
+        buttonPanelCubit = ButtonPanelCubit(ButtonPanelState.fromJson(
+            contentMap['state'] as Map<String, dynamic>));
+        buttonPanelCubit!.path =
+            (contentMap['path'] as List<dynamic>).cast();
+        buttonPanelCubit!.state.name = (contentMap['pathNames'] as List<dynamic>).cast().join(' ❯ ');
+        connection.sink.add(ConnectionState.active);
+      } else {
+        connection.sink.add(ConnectionState.active);
+        buttonPanelCubit!.setState(ButtonPanelState.fromJson(
+            contentMap['state']
+            as Map<String, dynamic>));
+        buttonPanelCubit!.path =
+            (contentMap['path'] as List<dynamic>).cast();
+        buttonPanelCubit!.state.name = (contentMap['pathNames'] as List<dynamic>).cast().join(' ❯ ');
+      }
+    });
+
+    socket.on('updateAvailable', (data) {
+      socket.emit('requestState', jsonEncode({'path': (buttonPanelCubit == null ? [] : buttonPanelCubit!.path)}));
+    });
+    
   }
 
   @override

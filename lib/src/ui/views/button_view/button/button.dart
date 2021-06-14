@@ -19,9 +19,19 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (buttonData.canBeOverwritten) {
-      return UndefinedButton(buttonData, buttonPanelCubit.state, context.read<ButtonPanelCubit>().getState().nonDefinedButtonDesign);
-    }
-    return DefinedButton(buttonData, buttonPanelCubit);
+    return Positioned(
+      top: buttonPanelCubit.state.gridTilingSize.height * buttonData.positionY,
+      left: buttonPanelCubit.state.gridTilingSize.width * buttonData.positionX,
+      height: buttonPanelCubit.state.gridTilingSize.height * buttonData.height,
+      width: buttonPanelCubit.state.gridTilingSize.width * buttonData.width,
+      child: Builder(
+        builder: (context) {
+          if (buttonData.canBeOverwritten) {
+            return UndefinedButton(buttonData, buttonPanelCubit);
+          }
+          return DefinedButton(buttonData, buttonPanelCubit);
+        },
+      ),
+    );
   }
 }

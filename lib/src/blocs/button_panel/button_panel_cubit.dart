@@ -1,14 +1,16 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamberry_client/src/app.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_data.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_state.dart';
 
 class ButtonPanelCubit extends Cubit<ButtonPanelState> {
 
 
-  List<int> path = [];
+  List<String> path = [];
 
   ButtonPanelCubit._(ButtonPanelState initialState,)
       : super(initialState);
@@ -16,40 +18,27 @@ class ButtonPanelCubit extends Cubit<ButtonPanelState> {
   ButtonPanelCubit(ButtonPanelState initialState) : super(initialState);
 
   String getPathString() {
-    String pathString = "Home";
-    ButtonPanelState cur = state;
-    for (var value in path) {
-      cur = cur.panelList[value].childState!;
-      pathString = '$pathString ❯ ${cur.name}';
-    }
-    return pathString;
+    return state.name;
   }
 
   ButtonPanelState getState() {
-    ButtonPanelState cur = state;
-    for (int i = 0; i < path.length; i++) {
-      if (cur.panelList[path[i]].childState == null) {
-        path.removeRange(i, path.length);
-        return cur;
-      }
-      cur = cur.panelList[path[i]].childState!;
-    }
-    return cur;
+    return state;
   }
 
   void setState(ButtonPanelState newState) {
     emit(ButtonPanelState.copy(newState));
   }
 
-  void refresh() {
-    _saveAndSync();
+  void refresh(BuildContext context) {
+    _saveAndSync(context);
   }
 
   ButtonData? getButtonData(ButtonData buttonData) {
-    return getState().panelList.firstWhere((element) => element.equals(buttonData));
+    return getState().panelList.firstWhere((element) => element==(buttonData));
   }
 
-  void _saveAndSync() {
-    emit(ButtonPanelState.copy(state));
+  void _saveAndSync(BuildContext context) {
+    App.socketOf(context).emit('requestState', jsonEncode({'path': path}));
+    //emit(ButtonPanelState.copy(state));
   }
 }

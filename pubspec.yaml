@@ -32,7 +32,9 @@ dependencies:
   flutter_bloc: ^7.0.1
   json_annotation: ^4.0.1
   hive: ^2.0.4
+  uuid: ^3.0.4
   hive_flutter: ^1.0.0
+  socket_io_client: ^1.0.1
 
 
   # The following adds the Cupertino Icons font to your application.

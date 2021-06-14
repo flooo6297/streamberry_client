@@ -24,11 +24,13 @@ class ButtonPanelState {
   @EdgeInsetsSerializer()
   late EdgeInsets margin;
 
+  late double borderRadius;
+
   late int xSize;
   late int ySize;
 
   ButtonPanelState(this.xSize, this.ySize, this.gridTilingSize,
-      this.backgroundColor, this.margin, this.name) {
+      this.backgroundColor, this.margin, this.name, this.borderRadius) {
     panelList = [];
 
     nonDefinedButtonDesign = ButtonData(0, 0);
@@ -49,6 +51,15 @@ class ButtonPanelState {
     margin = stateToCopy.margin;
     nonDefinedButtonDesign = stateToCopy.nonDefinedButtonDesign;
     name = stateToCopy.name;
+    borderRadius = stateToCopy.borderRadius;
+  }
+
+  ButtonData? getButtonDataById(String id) {
+    Iterable<ButtonData> buttons = panelList.where((element) => element.id == id);
+    if (buttons.isEmpty) {
+      return null;
+    }
+    return buttons.first;
   }
 
   factory ButtonPanelState.fromJson(Map<String, dynamic> json) =>
