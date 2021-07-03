@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamberry_client/src/app.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_cubit.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_state.dart';
+import 'package:streamberry_client/src/blocs/ip_address/ip_address_bloc.dart';
 import 'package:streamberry_client/src/ui/views/button_view/button/button.dart';
 
 class ButtonView extends StatefulWidget {
@@ -44,20 +46,35 @@ class _ButtonViewState extends State<ButtonView> {
                 alignment: Alignment.center,
                 child: Stack(
                   children: [
-                    Positioned(top: 8,
+                    Positioned(
+                      top: 8,
                       left: 8,
-                      child: Text(widget.buttonPanelCubit.getPathString()),),
+                      child: Text(widget.buttonPanelCubit.getPathString()),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: InkWell(
+                        child: Text(
+                          context.read<IpAddressBloc>().state.toString(),
+                        ),
+                        onTap: () {
+                          context.read<IpAddressBloc>().invalidate();
+                        },
+                      ),
+                    ),
                     Container(
                       alignment: Alignment.center,
                       child: SizedBox(
                         height:
-                        panelState.ySize * panelState.gridTilingSize.height,
-                        width: panelState.xSize * panelState.gridTilingSize.width,
+                            panelState.ySize * panelState.gridTilingSize.height,
+                        width:
+                            panelState.xSize * panelState.gridTilingSize.width,
                         child: Stack(
                           children: [
                             ...(panelState.panelList
                                 .map((buttonData) =>
-                                Button(buttonData, widget.buttonPanelCubit))
+                                    Button(buttonData, widget.buttonPanelCubit))
                                 .toList()),
                           ],
                         ),

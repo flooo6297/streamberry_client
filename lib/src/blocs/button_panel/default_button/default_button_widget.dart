@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:streamberry_client/src/app.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_data.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_cubit.dart';
@@ -26,7 +25,7 @@ class DefaultButtonWidget extends StatefulWidget {
 class _DefaultButtonWidgetState extends State<DefaultButtonWidget> {
   @override
   Widget build(BuildContext context) {
-    DefaultButton defaultButton = widget.buttonData.defaultButton!;
+    DefaultButton defaultButton = widget.buttonData.buttonType as DefaultButton;
 
     double borderRadius = 0.0;
 

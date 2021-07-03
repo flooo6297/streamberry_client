@@ -19,13 +19,8 @@ class DefinedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double borderRadius = 0.0;
 
-    if (buttonData.defaultButton != null) {
-      return buttonData.defaultButton!.buildSettings(buttonPanelCubit, buttonData);
-    }
+    return buttonData.buttonType.buildButton(buttonPanelCubit, buttonData);
 
-
-    return UndefinedButton(buttonData, buttonPanelCubit);
   }
 }

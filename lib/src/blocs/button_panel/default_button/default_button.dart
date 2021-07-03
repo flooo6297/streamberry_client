@@ -71,8 +71,4 @@ class DefaultButton extends ButtonType {
 
   @override
   String get type => 'defaultButton';
-
-  @override
-  Widget buildSettings(ButtonPanelCubit buttonPanelCubit, ButtonData buttonData) =>
-      DefaultButtonWidget(buttonPanelCubit, buttonData);
 }

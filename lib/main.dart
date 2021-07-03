@@ -9,6 +9,7 @@ void main() async {
   timeDilation = 1.0;
   await Hive.initFlutter();
   await Hive.openBox<Map<dynamic, dynamic>>('cached_images');
+  await Hive.openBox<String>('ip_address');
 
   //await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const App());

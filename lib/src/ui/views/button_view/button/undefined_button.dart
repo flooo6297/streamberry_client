@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_data.dart';
 import 'package:streamberry_client/src/blocs/button_panel/button_panel_cubit.dart';
+import 'package:streamberry_client/src/blocs/button_panel/default_button/default_button.dart';
 
 class UndefinedButton extends StatelessWidget {
   final ButtonData buttonData;
@@ -28,7 +29,7 @@ class UndefinedButton extends StatelessWidget {
       margin: buttonPanelCubit.state.margin,
       decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border.all(color: buttonPanelCubit.state.nonDefinedButtonDesign.defaultButton!.color, width: 3.0),
+        border: Border.all(color: (buttonPanelCubit.state.nonDefinedButtonDesign.buttonType as DefaultButton).color, width: 3.0),
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );
